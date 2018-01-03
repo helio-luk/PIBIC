@@ -11,7 +11,7 @@ import time
 tf.logging.set_verbosity(tf.logging.INFO)
 
 def cnn_model_fn(features, labels, mode):
-  input_layer = tf.reshape(features["x"], [-1, 640, 480, 1])
+  input_layer = tf.reshape(features["x"], [-1, 100, 100, 1])
 
   conv1 = tf.layers.conv2d(
       inputs=input_layer,
@@ -31,7 +31,7 @@ def cnn_model_fn(features, labels, mode):
 
   pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2,2], strides=2)
 
-  pool2_flat = tf.reshape(pool2, [-1, 7*7*64])
+  pool2_flat = tf.reshape(pool2, [-1, 25 * 25 * 64])
   dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
   dropout = tf.layers.dropout(
       inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
@@ -47,7 +47,7 @@ def cnn_model_fn(features, labels, mode):
   if mode == tf.estimator.ModeKeys.PREDICT:
     return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
-  onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int8), depth=10)
+  onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.uint8), depth=12)
   loss = tf.losses.softmax_cross_entropy(
       onehot_labels=onehot_labels, logits=logits)
 

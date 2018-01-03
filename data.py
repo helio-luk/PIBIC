@@ -2,10 +2,9 @@ import cv2
 import numpy as np
 
 class Data(object):
-    """docstring for Data"""
 
     def __init__(self, arquivo_video, arquivo_label, labels = [], image_matrix = []):
-        self.arquivo_video = arquivo_video #cv2.VideoCapture(arquivo_video)
+        self.arquivo_video = arquivo_video
         self.arquivo_label = arquivo_label
         self.labels = labels
         self.image_matrix = image_matrix
@@ -16,12 +15,11 @@ class Data(object):
     def setArquivoLabel(self, label):
         self.arquivo_label = label
 
-    #def getNumFrames(self):
-#        last = self.arquivo_label.readlines()
-#        num_frames = last[-1].split(';')[1]
-        #return self.num_frames
 
     def getLabels(self):
+        '''
+        Retorna array uint8 com as features de cada frame do video
+        '''
         def f(x):
             return {
                 'approach': 0,
@@ -44,14 +42,16 @@ class Data(object):
         num_frames = last[-1].split(';')[1]
 
         self.labels = np.zeros((int(int(num_frames))), dtype=np.uint8)
-        for line in a:
+        for line in last:
             ini, fin, label, _ = line.split(';')
             self.labels[int(ini)-1:int(fin)-1] = f(label)
+
         return self.labels
 
     def getVideoMatrix(self):
-        #v = cv2.VideoCapture('../videos/test/012609_A29_Block1_C57fe1_t.avi')
-        #frames = int(v.get(cv2.CAP_PROP_FRAME_COUNT))
+        '''
+        Returna uma matriz uint8 onde cada linha representa os frames do video
+        '''
 
         video = cv2.VideoCapture(self.arquivo_video)
         a = open(self.arquivo_label)
@@ -61,16 +61,15 @@ class Data(object):
         h = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
         w = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
 
-
-
         tam = h*w
-        self.image_matrix = np.zeros((int(num_frames),tam), dtype=np.uint8)
+        self.image_matrix = np.zeros((int(num_frames),tam), dtype=np.float16)
 
         for i in range(0, 1):
 
             ret, frame = video.read()
 
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            #image = cv2.resize(image, (100,100), interpolation = cv2.INTER_AREA)
 
             x = np.array(image, dtype=np.uint8)
             p = x.flatten().reshape(1,tam)
